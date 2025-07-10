@@ -7,7 +7,7 @@ A machine learning-based web application that predicts earthquake magnitudes and
 ![Flask](https://img.shields.io/badge/flask-2.0.1-green.svg)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.0.2-orange.svg)
 
-### 🎥🎥Live Demo - [SEE HERE !!](https://priya02.pythonanywhere.com/)
+### 🎥🎥Live Demo - [SEE HERE !!](https://priya02.pythonanywhere.com/)   (This site will be disabled on Friday 10 October 2025)
 
 ## 📋 Features
 
