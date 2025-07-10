@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Project - Earthquake Prediction System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <style>
+        :root {
+            --primary-color: #e8491d;
+            --secondary-color: #35424a;
+            --accent-color: #4a90e2;
+            --light-bg: #f8f9fa;
+            --dark-bg: #1d2429;
+            --text-color: #333;
+            --text-light: #6c757d;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            overflow-x: hidden;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, rgba(53, 66, 74, 0.9), rgba(29, 36, 41, 0.9)), 
+                        url('https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(232, 73, 29, 0.2), rgba(53, 66, 74, 0.7));
+            z-index: 1;
+        }
+        h2{
+            color: #35424a !important;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin: 60px 0 40px;
+        }
+        
+        .section-title h1, .section-title h2 {
+            color: white;
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        /* Ensure h2 in content areas are visible */
+        #about-project .card h2,
+        #about-project .feature-item h2,
+        #about-project .tech-stack h2,
+        #about-project .how-it-works h2,
+        #about-project #project-overview h2,
+        #about-project #key-features h2,
+        #about-project #technology-stack h2,
+        #about-project #how-it-works h2,
+        .about-section h2,
+        .content-section h2,
+        .card h2 {
+            color: #35424a !important;  /* Using direct color instead of variable */
+            margin: 25px 0 15px !important;
+            font-size: 2em !important;
+            position: relative !important;
+            padding-bottom: 10px !important;
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        /* Underline effect for h2 */
+        #about-project .card h2::after,
+        #about-project .feature-item h2::after,
+        #about-project #project-overview h2::after,
+        #about-project #key-features h2::after,
+        #about-project #technology-stack h2::after,
+        #about-project #how-it-works h2::after,
+        .about-section h2::after,
+        .content-section h2::after,
+        .card h2::after {
+            content: '' !important;
+            position: absolute !important;
+            width: 60px;
+            height: 3px;
+            background: var(--primary-color);
+            bottom: 0;
+            left: 0;
+            border-radius: 2px;
+        }
+        .section-title h1::after, .section-title h2::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background: var(--primary-color);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .feature-item {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-item i {
+            font-size: 2.5em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 40px 0;
+        }
+
+        .tech-item {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .tech-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tech-item i {
+            color: var(--primary-color);
+            font-size: 1.5em;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 30px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(232, 73, 29, 0.3);
+            margin-top: 20px;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(232, 73, 29, 0.4);
+            background: #d64015;
+            color: white;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .section-title h1, .section-title h2 {
+                font-size: 2.2em;
+            }
+            
+            .card {
+                padding: 25px 20px;
+            }
+            
+            .feature-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <div class="section-title" data-aos="fade-up">
+                <h1>About The Project</h1>
+                <p>Revolutionizing earthquake prediction with advanced machine learning</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Overview -->
+    <div class="container">
+        <div class="card" data-aos="fade-up">
+            <h2>Project Overview</h2>
+            <p>The Earthquake Prediction System is an innovative solution designed to forecast potential earthquake magnitudes using cutting-edge machine learning algorithms. By analyzing various seismic parameters, our system provides accurate predictions that can help in disaster preparedness and risk mitigation.</p>
+            <p>This project was developed with the goal of making earthquake prediction more accessible and understandable for everyone, from researchers to the general public.</p>
+        </div>
+
+        <!-- Features Section -->
+        <div class="section-title" data-aos="fade-up">
+            <h2>Key Features</h2>
+            <p>Powerful capabilities for accurate seismic analysis</p>
+        </div>
+
+        <div class="feature-list">
+            <div class="feature-item" data-aos="fade-up" data-aos-delay="100">
+                <i class="fas fa-bolt"></i>
+                <h3>Real-time Prediction</h3>
+                <p>Get instant earthquake magnitude predictions by inputting current seismic parameters for any location worldwide.</p>
+            </div>
+            <div class="feature-item" data-aos="fade-up" data-aos-delay="200">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Risk Assessment</h3>
+                <p>Receive detailed risk analysis and safety recommendations based on predicted magnitude values and historical data.</p>
+            </div>
+            <div class="feature-item" data-aos="fade-up" data-aos-delay="300">
+                <i class="fas fa-chart-line"></i>
+                <h3>Data Visualization</h3>
+                <p>Interactive visualizations help you understand seismic patterns and prediction results more effectively.</p>
+            </div>
+        </div>
+
+        <!-- Technology Stack -->
+        <div class="section-title" data-aos="fade-up">
+            <h2>Technology Stack</h2>
+            <p>Built with modern technologies for optimal performance</p>
+        </div>
+
+        <div class="tech-stack" data-aos="fade-up">
+            <div class="tech-item">
+                <i class="fab fa-python"></i>
+                <span>Python</span>
+            </div>
+            <div class="tech-item">
+                <i class="fas fa-flask"></i>
+                <span>Flask</span>
+            </div>
+            <div class="tech-item">
+                <i class="fas fa-robot"></i>
+                <span>scikit-learn</span>
+            </div>
+            <div class="tech-item">
+                <i class="fab fa-html5"></i>
+                <span>HTML5</span>
+            </div>
+            <div class="tech-item">
+                <i class="fab fa-css3-alt"></i>
+                <span>CSS3</span>
+            </div>
+            <div class="tech-item">
+                <i class="fab fa-js"></i>
+                <span>JavaScript</span>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="section-title" data-aos="fade-up">
+            <h2>How It Works</h2>
+            <p>Simple steps to predict earthquake magnitudes</p>
+        </div>
+
+        <div class="feature-list">
+            <div class="feature-item" data-aos="fade-up" data-aos-delay="100">
+                <div style="font-size: 2.5em; color: var(--primary-color); margin-bottom: 20px;">1</div>
+                <h3>Input Parameters</h3>
+                <p>Enter the seismic parameters including latitude, longitude, and depth of the location you want to analyze.</p>
+            </div>
+            <div class="feature-item" data-aos="fade-up" data-aos-delay="200">
+                <div style="font-size: 2.5em; color: var(--primary-color); margin-bottom: 20px;">2</div>
+                <h3>Machine Learning Analysis</h3>
+                <p>Our advanced algorithms process the input data using a pre-trained model to predict potential earthquake magnitudes.</p>
+            </div>
+            <div class="feature-item" data-aos="fade-up" data-aos-delay="300">
+                <div style="font-size: 2.5em; color: var(--primary-color); margin-bottom: 20px;">3</div>
+                <h3>Get Results</h3>
+                <p>Receive instant predictions along with risk assessments and safety recommendations.</p>
+            </div>
+        </div>
+
+        <div class="text-center" data-aos="fade-up">
+            <a href="/" class="btn">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        // Initialize AOS (Animate On Scroll)
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+    </script>
+</body>
+</html>

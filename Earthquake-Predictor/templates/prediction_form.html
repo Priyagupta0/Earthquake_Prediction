@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Earthquake Prediction Form</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Earthquake Prediction</h1>
+        <p>Please enter the following seismic parameters:</p>
+        
+        <form action="{{ url_for('prediction') }}" method="POST">
+            <div class="form-group">
+                <label for="a">Seismic Parameter 1:</label>
+                <input type="number" step="0.01" name="a" id="a" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="b">Seismic Parameter 2:</label>
+                <input type="number" step="0.01" name="b" id="b" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="c">Seismic Parameter 3:</label>
+                <input type="number" step="0.01" name="c" id="c" class="form-control" required>
+            </div>
+            
+            <button type="submit" class="btn">
+                <i class="fas fa-calculator"></i> Predict Magnitude
+            </button>
+            
+            <a href="{{ url_for('home') }}" class="btn" style="background-color: #6c757d;">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earthquake Prediction Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #e8491d;
+            --secondary-color: #35424a;
+            --light-bg: #f8f9fa;
+            --text-color: #333;
+            --text-light: #6c757d;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            padding: 40px 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .container {
+                padding: 0 20px;
+            }
+            
+            .result-header h1 {
+                font-size: 1.8em;
+                padding: 15px 20px;
+            }
+            
+            .result-content {
+                padding: 25px;
+            }
+            
+            .magnitude-display {
+                font-size: 3.5em;
+                margin: 15px 0;
+            }
+            
+            .risk-level {
+                font-size: 1.4em;
+                padding: 8px 16px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+            
+            .result-header h1 {
+                font-size: 1.6em;
+                padding: 12px 15px;
+            }
+            
+            .magnitude-display {
+                font-size: 3em;
+            }
+            
+            .risk-level {
+                font-size: 1.2em;
+                padding: 6px 12px;
+            }
+            
+            .result-details {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .detail-item {
+                text-align: center;
+                padding: 15px;
+            }
+            
+            .safety-tips h2 {
+                font-size: 1.4em;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .result-header h1 {
+                font-size: 1.4em;
+                padding: 10px 12px;
+            }
+            
+            .magnitude-display {
+                font-size: 2.5em;
+                margin: 10px 0;
+            }
+            
+            .risk-level {
+                font-size: 1.1em;
+                padding: 5px 10px;
+            }
+            
+            .result-content {
+                padding: 20px 15px;
+            }
+            
+            .safety-tips h2 {
+                font-size: 1.3em;
+                margin-bottom: 15px;
+            }
+            
+            .safety-tips ul {
+                padding-left: 20px;
+            }
+            
+            .safety-tips li {
+                margin-bottom: 8px;
+                font-size: 0.95em;
+            }
+        }
+        
+        .result-header {
+            background: var(--secondary-color);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .result-header h1 {
+            margin: 0;
+            font-size: 2.2em;
+        }
+        
+        .result-content {
+            padding: 30px;
+        }
+        
+        .magnitude-display {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .magnitude {
+            font-size: 5em;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1;
+            margin: 20px 0;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .magnitude-label {
+            font-size: 1.2em;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .risk-indicator {
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 1.4em;
+            font-weight: 500;
+            margin: 15px 0;
+            color: white;
+        }
+        
+        .no-risk { background-color: #4CAF50; }
+        .low-risk { background-color: #8BC34A; }
+        .moderate-risk { background-color: #FFC107; color: #000; }
+        .high-risk { background-color: #FF9800; }
+        .very-high-risk { background-color: #f44336; }
+        
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .detail-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .detail-card i {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .detail-card h3 {
+            margin: 10px 0 5px;
+            font-size: 1.1em;
+            color: var(--secondary-color);
+        }
+        
+        .detail-card p {
+            margin: 0;
+            font-size: 1.3em;
+            font-weight: 500;
+        }
+        
+        .safety-tips {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .safety-tips h2 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .safety-tips h2 i {
+            color: var(--primary-color);
+        }
+        
+        .safety-tips ul {
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+        
+        .safety-tips li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+        
+        .action-buttons .btn {
+            flex: 1 1 200px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 30px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(232, 73, 29, 0.3);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(232, 73, 29, 0.4);
+            background: #d64015;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        @media (max-width: 992px) {
+            .container {
+                padding: 0 20px;
+            }
+            
+            .magnitude {
+                font-size: 4.5em;
+            }
+            
+            .result-header h1 {
+                font-size: 1.8em;
+                padding: 15px 20px;
+            }
+            
+            .result-content {
+                padding: 25px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+            
+            .magnitude {
+                font-size: 3.5em;
+                margin: 15px 0;
+            }
+            
+            .result-header h1 {
+                font-size: 1.6em;
+                padding: 12px 15px;
+            }
+            
+            .result-content {
+                padding: 20px 15px;
+            }
+            
+            .result-details {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                margin: 20px 0;
+            }
+            
+            .detail-card {
+                padding: 15px;
+            }
+            
+            .safety-tips {
+                padding: 20px;
+                margin-top: 20px;
+            }
+            
+            .safety-tips h2 {
+                font-size: 1.4em;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 30px;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 12px 20px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            body {
+                padding: 15px 5px;
+            }
+            
+            .magnitude {
+                font-size: 3em;
+            }
+            
+            .result-header h1 {
+                font-size: 1.4em;
+                padding: 10px 12px;
+            }
+            
+            .risk-indicator {
+                font-size: 1.1em;
+                padding: 8px 16px;
+            }
+            
+            .result-content {
+                padding: 15px 10px;
+            }
+            
+            .safety-tips {
+                padding: 15px;
+            }
+            
+            .safety-tips h2 {
+                font-size: 1.3em;
+                margin-bottom: 12px;
+            }
+            
+            .safety-tips ul {
+                padding-left: 20px;
+            }
+            
+            .safety-tips li {
+                margin-bottom: 8px;
+                font-size: 0.95em;
+            }
+            
+            .action-buttons {
+                margin-top: 25px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .magnitude {
+                font-size: 2.5em;
+            }
+            
+            .magnitude-label {
+                font-size: 1em;
+            }
+            
+            .risk-indicator {
+                font-size: 1em;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="result-card">
+            <div class="result-header">
+                <h1>Earthquake Prediction Result</h1>
+            </div>
+            
+            <div class="result-content">
+                <div class="magnitude-display">
+                    <div class="magnitude">{{ p }}</div>
+                    <div class="magnitude-label">Magnitude</div>
+                    <div class="risk-indicator {{ result.risk_class if result else '' }}">
+                        {{ q }} Risk
+                    </div>
+                </div>
+                
+                <div class="result-details">
+                    <!-- <div class="detail-card">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h3>Location</h3>
+                        <p>{{ result.location if result else 'N/A' }}</p>
+                    </div>
+                    <div class="detail-card">
+                        <i class="fas fa-ruler-vertical"></i>
+                        <h3>Depth</h3>
+                        <p>{{ result.depth if result else 'N/A' }}</p>
+                    </div> -->
+                    <div class="detail-card">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Risk Level</h3>
+                        <p>{{ q }}</p>
+                    </div>
+                </div>
+                
+                <div class="safety-tips">
+                    <h2><i class="fas fa-shield-alt"></i> Safety Recommendations</h2>
+                    
+                    {% if q == 'No' or q == 'Low' %}
+                        <p>No immediate action required, but it's always good to be prepared. Here are some general safety tips:</p>
+                    {% elif q == 'Moderate' %}
+                        <p>Be prepared and review these safety measures:</p>
+                    {% elif q == 'High' %}
+                        <p>Take precautions and follow these safety guidelines:</p>
+                    {% else %}
+                        <p>High alert! Please follow these safety instructions carefully:</p>
+                    {% endif %}
+                    
+                    <ul>
+                        {% if q == 'No' or q == 'Low' %}
+                            <li>Stay informed about earthquake safety measures in your area.</li>
+                            <li>Review your emergency plan with family members.</li>
+                            <li>Check your emergency supplies and ensure they're up to date.</li>
+                        {% elif q == 'Moderate' %}
+                            <li>Secure heavy furniture and objects that could fall.</li>
+                            <li>Identify safe spots in each room (under sturdy furniture, against inside walls).</li>
+                            <li>Practice "Drop, Cover, and Hold On" drills.</li>
+                        {% elif q == 'High' %}
+                            <li>Review and practice your evacuation plan.</li>
+                            <li>Know how to turn off gas, water, and electricity in your home.</li>
+                            <li>Prepare an emergency kit with essential supplies for at least 3 days.</li>
+                        {% else %}
+                            <li>Be prepared to evacuate if necessary.</li>
+                            <li>Move to higher ground if you're in a coastal area (tsunami risk).</li>
+                            <li>Stay away from damaged areas and follow instructions from local authorities.</li>
+                        {% endif %}
+                        
+                        <li>Keep emergency supplies including water (1 gallon per person per day), non-perishable food, flashlight, batteries, first aid kit, medications, and important documents.</li>
+                        <li>Have a battery-powered or hand-crank radio to receive emergency information.</li>
+                    </ul>
+                    
+                    {% if q in ['High', 'Very High'] %}
+                        <p style="margin-top: 15px; font-weight: 500; color: var(--primary-color);">
+                            <i class="fas fa-exclamation-triangle"></i> Stay alert and be prepared to take immediate action if the situation changes.
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="/" class="btn"><i class="fas fa-home"></i> Back to Home</a>
+                    <a href="#" onclick="window.history.back(); return false;" class="btn btn-outline"><i class="fas fa-undo"></i> New Prediction</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Add animation when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.magnitude-display, .result-details, .safety-tips, .action-buttons');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 100 + (index * 100));
+            });
+            
+            // Add printing functionality
+            document.querySelector('.btn-print').addEventListener('click', function() {
+                window.print();
+            });
+        });
+    </script>
+</body>
+</html>

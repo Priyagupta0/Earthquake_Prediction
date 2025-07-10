@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earthquake Prediction System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <style>
+        /* Loading State */
+        body.loading {
+            opacity: 0.7;
+            pointer-events: none;
+            position: relative;
+        }
+        
+        body.loading::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.7);
+            z-index: 9998;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #e8491d;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            display: none;
+        }
+        
+        body.loading .spinner {
+            display: block;
+        }
+        
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        :root {
+            --primary-color: #e8491d;
+            --secondary-color: #35424a;
+            --accent-color: #4a90e2;
+            --light-bg: #f8f9fa;
+            --dark-bg: #1d2429;
+            --text-color: #333;
+            --text-light: #6c757d;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            overflow-x: hidden;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(53, 66, 74, 0.9), rgba(29, 36, 41, 0.9)), 
+                        url('https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            padding: 120px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(232, 73, 29, 0.2), rgba(53, 66, 74, 0.7));
+            z-index: 1;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .hero h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-weight: 700;
+            letter-spacing: 1px;
+            animation: fadeInUp 1s ease;
+        }
+        
+        .hero p {
+            font-size: 1.3em;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            line-height: 1.8;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease 0.2s;
+            animation-fill-mode: both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .nav-links {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            animation: fadeInUp 1s ease 0.4s;
+            animation-fill-mode: both;
+        }
+        
+        .nav-links a {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 25px;
+            margin: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 50px;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-links a i {
+            margin-right: 8px;
+            font-size: 1.1em;
+        }
+        
+        .nav-links a:hover {
+            background: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(232, 73, 29, 0.3);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .section-title h2 {
+            font-size: 2.5em;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-color);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+        
+        .prediction-form {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--box-shadow);
+            padding: 40px;
+            margin: 0 auto;
+            max-width: 800px;
+            transform: translateY(-50px);
+            position: relative;
+            z-index: 10;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(232, 73, 29, 0.2);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 30px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(232, 73, 29, 0.3);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(232, 73, 29, 0.4);
+            background: #d64015;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin: 80px 0;
+        }
+        
+        .feature {
+            background: white;
+            border-radius: 12px;
+            padding: 35px 30px;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .feature::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--primary-color);
+            transition: var(--transition);
+        }
+        
+        .feature:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature:hover::before {
+            height: 100%;
+            opacity: 0.05;
+        }
+        
+        .feature i {
+            font-size: 3em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+        
+        .feature:hover i {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .feature h3 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .feature p {
+            color: var(--text-light);
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+        }
+        
+        footer {
+            background: var(--dark-bg);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            margin-top: 60px;
+        }
+        
+        footer p {
+            margin: 0;
+            opacity: 0.8;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .container {
+                padding: 0 20px;
+            }
+            
+            .hero-content {
+                padding: 0 20px;
+            }
+            
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .hero {
+                padding: 100px 0;
+            }
+            
+            .hero h1 {
+                font-size: 2.8em;
+                line-height: 1.2;
+            }
+            
+            .hero p {
+                font-size: 1.2em;
+                margin: 20px auto;
+                max-width: 90%;
+            }
+            
+            .form-container {
+                padding: 30px;
+                max-width: 90%;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero {
+                padding: 80px 0;
+                background-attachment: scroll;
+            }
+            
+            .hero h1 {
+                font-size: 2.2em;
+            }
+            
+            .hero p {
+                font-size: 1.1em;
+                max-width: 100%;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .feature {
+                margin-bottom: 30px;
+                padding: 25px;
+            }
+            
+            .section-title h2 {
+                font-size: 2em;
+            }
+            
+            .form-container {
+                padding: 25px;
+                margin: 0 auto;
+            }
+            
+            .form-group input {
+                padding: 12px 15px;
+                font-size: 0.95em;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero {
+                padding: 60px 0;
+            }
+            
+            .hero h1 {
+                font-size: 1.8em;
+            }
+            
+            .hero p {
+                font-size: 1em;
+                margin: 15px 0;
+            }
+            
+            .section-title h2 {
+                font-size: 1.8em;
+            }
+            
+            .form-container {
+                padding: 20px 15px;
+                border-radius: 8px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+            
+            .feature i {
+                font-size: 2.5em;
+            }
+            
+            .feature h3 {
+                font-size: 1.3em;
+            }
+        }
+        
+        /* Small devices (landscape phones, 576px and up) */
+        @media (min-width: 576px) and (max-width: 767.98px) {
+            .container {
+                max-width: 540px;
+            }
+        }
+        
+        /* Medium devices (tablets, 768px and up) */
+        @media (min-width: 768px) and (max-width: 991.98px) {
+            .container {
+                max-width: 720px;
+            }
+        }
+        
+        /* Large devices (desktops, 992px and up) */
+        @media (min-width: 992px) and (max-width: 1199.98px) {
+            .container {
+                max-width: 960px;
+            }
+        }
+        
+        /* Extra large devices (large desktops, 1200px and up) */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1140px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 data-aos="fade-up">Earthquake Prediction System</h1>
+            <p data-aos="fade-up" data-aos-delay="100">Leveraging machine learning to predict earthquake magnitudes and assess seismic risks</p>
+            
+            <div class="nav-links">
+                <a href="#predict" class="btn btn-outline"><i class="fas fa-bolt"></i> Make Prediction</a>
+                <a href="/aboutproject" class="btn btn-outline"><i class="fas fa-info-circle"></i> About Project</a>
+                <a href="/creator" class="btn btn-outline"><i class="fas fa-user"></i> Creator</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Loading Spinner -->
+    <div class="spinner" id="loadingSpinner"></div>
+    <!-- End Loading Spinner -->
+
+    <!-- Prediction Form -->
+    <div class="container">
+        <form action="{{ url_for('prediction') }}" method="POST" class="prediction-form" id="predict" data-aos="fade-up" onsubmit="return validateForm()">
+            <h2>Earthquake Magnitude Predictor</h2>
+            <p class="text-center" style="margin-bottom: 30px; color: #666;">Enter the seismic parameters below to predict the magnitude of an earthquake</p>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="a"><i class="fas fa-map-marker-alt"></i> Latitude:</label>
+                    <input type="number" step="0.0001" class="form-control" id="a" name="a" placeholder="e.g., 37.7749" required>
+                </div>
+                <div class="form-group">
+                    <label for="b"><i class="fas fa-map-marker-alt"></i> Longitude:</label>
+                    <input type="number" step="0.0001" class="form-control" id="b" name="b" placeholder="e.g., -122.4194" required>
+                </div>
+                <div class="form-group">
+                    <label for="c"><i class="fas fa-ruler-vertical"></i> Depth (km):</label>
+                    <input type="number" step="0.1" class="form-control" id="c" name="c" placeholder="e.g., 10.5" required>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <button type="submit" class="btn" id="predictBtn">
+                    <i class="fas fa-calculator"></i> Predict Magnitude
+                </button>
+                <div id="form-status" style="margin-top: 15px; color: #e8491d; font-weight: 500;"></div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Features Section -->
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Why Choose Our System</h2>
+            <p>Advanced technology for accurate earthquake predictions</p>
+        </div>
+        
+        <div class="features">
+            <div class="feature" data-aos="fade-up" data-aos-delay="100">
+                <i class="fas fa-chart-line"></i>
+                <h3>Accurate Predictions</h3>
+                <p>Our advanced machine learning model provides accurate earthquake magnitude predictions based on comprehensive historical seismic data analysis.</p>
+            </div>
+            <div class="feature" data-aos="fade-up" data-aos-delay="200">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Risk Assessment</h3>
+                <p>Get detailed risk assessments with safety recommendations to help you prepare and stay safe during seismic activities.</p>
+            </div>
+            <div class="feature" data-aos="fade-up" data-aos-delay="300">
+                <i class="fas fa-bolt"></i>
+                <h3>Real-time Analysis</h3>
+                <p>Process seismic data in real-time for immediate insights, early warnings, and rapid response capabilities.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div style="background: #f8f9fa; padding: 80px 0;">
+        <div class="container">
+            <div class="section-title" data-aos="fade-up">
+                <h2>How It Works</h2>
+                <p>Simple steps to get your earthquake prediction</p>
+            </div>
+            
+            <div class="features">
+                <div class="feature" data-aos="fade-up" data-aos-delay="100">
+                    <div style="font-size: 2.5em; color: #e8491d; margin-bottom: 20px;">1</div>
+                    <h3>Enter Location Data</h3>
+                    <p>Provide the latitude, longitude, and depth of the location you want to analyze for potential seismic activity.</p>
+                </div>
+                <div class="feature" data-aos="fade-up" data-aos-delay="200">
+                    <div style="font-size: 2.5em; color: #e8491d; margin-bottom: 20px;">2</div>
+                    <h3>Process Analysis</h3>
+                    <p>Our system processes the data using advanced machine learning algorithms to predict potential earthquake magnitudes.</p>
+                </div>
+                <div class="feature" data-aos="fade-up" data-aos-delay="300">
+                    <div style="font-size: 2.5em; color: #e8491d; margin-bottom: 20px;">3</div>
+                    <h3>Get Results</h3>
+                    <p>Receive instant predictions along with risk assessments and safety recommendations.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer data-aos="fade-up">
+        <div class="container">
+            <p>&copy; 2023 Earthquake Prediction System. All rights reserved.</p>
+            <div style="margin-top: 20px;">
+                <a href="https://github.com/Priyagupta0" class="social-link" style="margin: 0 10px;"><i class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/priya-gupta-325b67290" class="social-link" style="margin: 0 10px;"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        // Initialize AOS (Animate On Scroll)
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Form validation and submission
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            console.log('Form submission started');
+            
+            const form = document.getElementById('predict');
+            const button = document.getElementById('predictBtn');
+            const statusDiv = document.getElementById('form-status');
+            
+            // Reset status
+            statusDiv.textContent = '';
+            statusDiv.style.color = '#e8491d';
+            
+            // Disable button to prevent double submission
+            const originalButtonText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Predicting...';
+            
+            // Show loading state
+            document.body.classList.add('loading');
+            const spinner = document.getElementById('loadingSpinner');
+            if (spinner) spinner.style.display = 'block';
+            
+            try {
+                // Get form values
+                const formData = new FormData(form);
+                const formValues = Object.fromEntries(formData.entries());
+                console.log('Form values:', formValues);
+                
+                // Basic validation
+                const a = parseFloat(formValues.a);
+                const b = parseFloat(formValues.b);
+                const c = parseFloat(formValues.c);
+                
+                if (isNaN(a) || isNaN(b) || isNaN(c)) {
+                    throw new Error('Please enter valid numbers for all fields');
+                }
+                
+                // Show loading status
+                statusDiv.textContent = 'Processing your prediction...';
+                statusDiv.style.color = '#4CAF50';
+                
+                // Submit the form
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json, text/plain, */*'
+                    },
+                    body: new URLSearchParams(formValues).toString()
+                });
+                
+                // Handle the response
+                const contentType = response.headers.get('content-type');
+                let result;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    result = await response.json();
+                    console.log('JSON response:', result);
+                    
+                    if (!response.ok) {
+                        throw new Error(result.message || 'Failed to get prediction');
+                    }
+                    
+                    // Handle successful JSON response
+                    if (result.redirect) {
+                        // Redirect to the prediction result page
+                        window.location.href = result.redirect;
+                        return;
+                    } else if (result.html) {
+                        // Replace the current page with the response HTML
+                        document.open();
+                        document.write(result.html);
+                        document.close();
+                        return;
+                    }
+                } else {
+                    // Handle HTML response (non-JSON)
+                    const html = await response.text();
+                    console.log('HTML response received');
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to get prediction');
+                    }
+                    
+                    // Replace the current page with the response HTML
+                    document.open();
+                    document.write(html);
+                    document.close();
+                    return;
+                }
+                
+                // If we get here, we didn't handle the response properly
+                throw new Error('Unexpected response from server');
+                
+            } catch (error) {
+                console.error('Form submission error:', error);
+                
+                // Show error message to user
+                statusDiv.textContent = error.message || 'An error occurred. Please try again.';
+                statusDiv.style.color = '#e8491d';
+                
+                // Re-enable the button
+                button.disabled = false;
+                button.innerHTML = originalButtonText;
+                
+            } finally {
+                // Always clean up the loading state
+                document.body.classList.remove('loading');
+                if (spinner) spinner.style.display = 'none';
+            }
+        }
+        
+        // Add event listener to the form
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('predict');
+            if (form) {
+                form.addEventListener('submit', handleFormSubmit);
+                
+                // Log form action and method for debugging
+                console.log('Form action:', form.action);
+                console.log('Form method:', form.method);
+            }
+        });
+    </script>
+</body>
+</html>
